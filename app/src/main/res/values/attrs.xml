@@ -1,0 +1,24 @@
+<resources>
+
+    <!-- Declare custom theme attributes that allow changing which styles are
+         used for button bars depending on the API level.
+         ?android:attr/buttonBarStyle is new as of API 11 so this is
+         necessary to support previous API levels. -->
+    <declare-styleable name="ButtonBarContainerTheme">
+        <attr name="metaButtonBarStyle" format="reference" />
+        <attr name="metaButtonBarButtonStyle" format="reference" />
+    </declare-styleable>
+    <declare-styleable name="AmayaEmptyView">
+        <attr name="isTextTop" format="boolean" />
+        <attr name="emptyImage" format="reference|integer" />
+        <attr name="emptyText" format="reference|string" />
+        <attr name="emptyTextColor" format="color" />
+    </declare-styleable>
+
+    <declare-styleable name="AmayaGPSView">
+        <attr name="textOn" format="reference" />
+        <attr name="textOff" format="reference" />
+        <attr name="needGPSAddress" format="boolean" />
+        <attr name="amaya_padding" format="dimension" />
+    </declare-styleable>
+</resources>

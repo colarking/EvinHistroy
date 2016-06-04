@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="black">#000000</color>
+    <color name="white">#ffffff</color>
+    <color name="_333333">#333333</color>
+
+    <color name="black_overlay">#66000000</color>
+    <color name="color_1c1c1c">#1c1c1c</color>
+    <color name="amaya_text_bill_hint">#4d4a4a</color>
+    <color name="amaya_text_bill">#14a98c</color>
+    <color name="amaya_text_bill_bg">#ffFFFDF7</color>
+    <color name="transparent">#00000000</color>
+    <color name="darkgrey"> #C0C0C0</color>
+    <color name="gary">#898989</color>
+
+
+    <drawable name="gray">#66000000</drawable>
+    <drawable name="transparent">#00000000</drawable>
+    <drawable name="loading_icon">#a6a3a4</drawable>
+    <drawable name="list_view_select">#d9d9d9</drawable>
+    <drawable name="poi_item_normal">@color/colorPrimaryDark</drawable>
+    <drawable name="poi_item_select">@color/colorPrimary</drawable>
+</resources>

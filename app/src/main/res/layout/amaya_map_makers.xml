@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:orientation="vertical"
+             android:id="@+id/amaya_map_parent">
+    <com.amap.api.maps.MapView
+            android:id="@+id/amaya_map_maker"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom"/>
+
+    <ListView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:layout_gravity="bottom"
+            android:id="@+id/amaya_map_poi_list"
+            android:layout_below="@id/amaya_map_maker"
+            android:background="#ffffff"/>
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:id="@+id/amaya_map_poi_types"
+            android:layout_gravity="top"
+            android:background="@color/amaya_text_bill_bg">
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:orientation="horizontal">
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:textSize="16sp"
+                    android:text="@string/amaya_poi_search_street"
+                    android:id="@+id/amaya_poi_search_street"/>
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:textSize="16sp"
+                    android:text="@string/amaya_poi_search_hotal"
+                    android:id="@+id/amaya_poi_search_hotal"/>
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:textSize="16sp"
+                    android:text="@string/amaya_poi_search_eat"
+                    android:id="@+id/amaya_poi_search_food"/>
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:textSize="16sp"
+                    android:text="@string/amaya_poi_search_place"
+                    android:id="@+id/amaya_poi_search_place"/>
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:textSize="16sp"
+                    android:text="@string/amaya_poi_search_movie"
+                    android:id="@+id/amaya_poi_search_movie"/>
+        </LinearLayout>
+
+        <View
+                android:layout_width="match_parent"
+                android:layout_height="3dp"
+                android:id="@+id/amaya_map_poibot_index"/>
+    </LinearLayout>
+
+    <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/amaya_map_scroll"
+            android:minWidth="720dp"
+            android:minHeight="48dp"
+            android:layout_marginTop="43dp">
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:id="@+id/amaya_map_imgs"/>
+    </HorizontalScrollView>
+
+</FrameLayout>

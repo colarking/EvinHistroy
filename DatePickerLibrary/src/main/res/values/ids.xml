@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item type="id" name="numbers_key"/>
+    <item type="id" name="date_keyboard" />
+    <item type="id" name="date_month_int" />
+
+    <item name="id_text_year_show" type="id"/>
+    <item name="id_text_ad" type="id"/>
+    <item name="id_text_bc" type="id"/>
+    <item name="id_text_line" type="id"/>
+    <item name="id_text_year" type="id"/>
+    <item name="id_text_year_edit" type="id"/>
+</resources>

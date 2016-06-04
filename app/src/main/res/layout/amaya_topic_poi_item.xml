@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:gravity="center"
+             android:paddingTop="3dp"
+             android:paddingBottom="3dp"
+        >
+    <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:id="@+id/amaya_poi_name"
+              android:textSize="15sp" android:textColor="@android:color/white" android:paddingTop="8dp"
+              android:paddingLeft="2dp"
+              android:paddingRight="2dp"
+              android:singleLine="true"
+              android:ellipsize="end"
+              android:paddingBottom="8dp"/>
+    <TextView android:layout_width="wrap_content" android:layout_height="match_parent" android:gravity="bottom|right"
+              android:id="@+id/amaya_poi_distance" android:textSize="8sp" android:textColor="@android:color/white"
+              android:layout_gravity="bottom|right"
+              android:paddingRight="2dp"
+            />
+
+
+</FrameLayout>

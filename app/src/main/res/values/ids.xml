@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="amaya_gps_address" type="id" />
+    <item name="amaproya_gps_bar" type="id" />
+    <item name="amaya_gps_hidegps" type="id" />
+</resources>
