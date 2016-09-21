@@ -3,28 +3,13 @@ package com.evin.fragment;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
-import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -34,51 +19,34 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.JSONObject;
-import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialogFragment;
 import com.evin.R;
 import com.evin.activity.EvinActivity;
 import com.evin.activity.ImgChooserActivity;
 import com.evin.activity.XApplication;
-import com.evin.adapter.AmayaImgsAdapter;
 import com.evin.bean.EvinImage;
-import com.evin.bean.EvinImageDao;
 import com.evin.bean.EvinTime;
-import com.evin.util.AmayaConstants;
 import com.evin.util.AmayaEvent;
 import com.evin.util.AmayaGPSUtil;
 import com.evin.util.AmayaSPUtil;
 import com.evin.util.AmayaToast;
-import com.evin.util.ToastUtil;
 import com.evin.util.UIUtil;
 import com.evin.view.AmayaTopicItemView;
-import com.umeng.analytics.MobclickAgent;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import java.io.File;
 import java.io.IOException;
-import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 
-public class MyDailyTopicFragment extends BaseFragment implements  OnClickListener, OnTouchListener, OnItemClickListener, MenuItem.OnMenuItemClickListener, CalendarDatePickerDialogFragment.OnDateSetListener {
+public class EditImageFragment extends BaseFragment implements OnClickListener, OnTouchListener, OnItemClickListener, MenuItem.OnMenuItemClickListener {
 
     private LinearLayout picsList;
     private String tempPath;//,topicId,topicName;
@@ -105,19 +73,10 @@ public class MyDailyTopicFragment extends BaseFragment implements  OnClickListen
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mActivity = (EvinActivity) getActivity();
         View view = inflater.inflate(R.layout.amaya_daily_topic_old, null);
-//        gpsView = (AmayaGPSView) view.findViewById(R.id.daily_topic_gps);
-//        gpsView.update();
         picsList = (LinearLayout) view.findViewById(R.id.daily_topic_pics);
         sd = new SimpleDateFormat("yyyyMMdd_HHmmsss");
         addBtn = view.findViewById(R.id.amaya_topic_add_pic);
         addBtn.setOnClickListener(this);
-//        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) amayaScroll.getLaayoutParams();
-//        lp.height = AmayaUIUtil.dip2px(500);
-//        amayaScroll.setLayoutParams(lp);
-//        View bottomLayout = view.findViewById(R.id.daily_topic_button_parent);
-//        LinearLayout.LayoutParams llp = (LinearLayout.LayoutParams) bottomLayout.getLayoutParams();
-//        llp.height = AmayaUIUtil.getCommonHeight(48);
-//        startSearchForRJPs();
         getAll();
         setHasOptionsMenu(true);
         return view;
@@ -151,7 +110,6 @@ public class MyDailyTopicFragment extends BaseFragment implements  OnClickListen
         MenuItem add = menu.add(R.string.ok);
         add.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
         add.setOnMenuItemClickListener(this);
-
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -172,7 +130,6 @@ public class MyDailyTopicFragment extends BaseFragment implements  OnClickListen
         for (int i = 0; i < picsList.getChildCount(); i++) {
             AmayaTopicItemView aiv = (AmayaTopicItemView) picsList.getChildAt(i);
             EvinImage item = aiv.getBean();
-            JSONObject jo = new JSONObject();
             BitmapFactory.Options o = new BitmapFactory.Options();
             o.inJustDecodeBounds = true;
             int rotation = 0;
@@ -189,13 +146,11 @@ public class MyDailyTopicFragment extends BaseFragment implements  OnClickListen
                 item.setHeight(o.outHeight);
             }
             alps.add(item);
-            XApplication.getDaoSession().getEvinImageDao().insert(item);
+            XApplication.getDaoSession().getEvinImageDao().insertOrReplace(item);
         }
         clearAll();
         hideAddBtn(false);
 
-//        HashMap<String, String> map = new HashMap<>();
-//        MobclickAgent.onEvent(getContext(), "DailyTopic", map);
     }
 
     @Override
@@ -211,12 +166,6 @@ public class MyDailyTopicFragment extends BaseFragment implements  OnClickListen
             default:
                 break;
         }
-    }
-
-    public void showDialog(){
-        CalendarDatePickerDialogFragment cdp = new CalendarDatePickerDialogFragment()
-                .setOnDateSetListener(this);
-        cdp.show(getActivity().getSupportFragmentManager(), "FRAG_TAG_DATE_PICKER");
     }
 
     private void jumpToChooser() {
@@ -263,23 +212,11 @@ public class MyDailyTopicFragment extends BaseFragment implements  OnClickListen
     private void clearAll() {
         currentPos = -1;
         picsList.removeAllViews();
-        int count = picsList.getChildCount();
-//        if(count>1){
-//
-//            for(int i=1;i<count;i++){
-//                AmayaTopicItemView at = (AmayaTopicItemView) picsList.getChildAt(i);
-//                AmayaLog.e("amaya","clearAll()...i="+i+"--atv="+at);
-//                if(at != null){
-//                    at.clear();
-//                    picsList.removeView(at);
-//                }
-//            }
-//
+        AmayaSPUtil.remove("amaya_image_ids");
     }
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        // TODO Auto-generated method stub
         return true;
     }
 
@@ -377,28 +314,6 @@ public class MyDailyTopicFragment extends BaseFragment implements  OnClickListen
 
     }
 
-    private void getPhotoFromPictures() {
-//        if (Build.VERSION.SDK_INT < 19) {
-////            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-////            // The MIME data type filter
-////            intent.setType("image/*");
-////            // Only return URIs that can be opened with ContentResolver
-////            startActivityForResult(intent, AMAYA_ACTION_REQUEST_FORM_PICTURES);
-//            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-//            startActivityForResult(intent, AmayaConstants.AMAYA_ACTION_REQUEST_FORM_PICTURES);
-//        } else {
-//            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-//            intent.addCategory(Intent.CATEGORY_OPENABLE);
-//            intent.setType("image/jpeg");
-//            startActivityForResult(intent, AmayaConstants.AMAYA_ACTION_REQUEST_FORM_PICTURES_KITKAT);
-//        }
-
-
-        Intent intent = new Intent(getActivity(), ImgChooserActivity.class);
-        intent.putExtra("max", 8 - picsList.getChildCount());
-        startActivity(intent);
-    }
-
     public void onEventMainThread(ArrayList<String> datas) {
         if (datas != null && datas.size() > 0) {
             for (int i = 0; i < datas.size(); i++) {
@@ -454,10 +369,7 @@ public class MyDailyTopicFragment extends BaseFragment implements  OnClickListen
         } catch (IOException e) {
             e.printStackTrace();
         }
-        long insert = XApplication.getDaoSession().getEvinImageDao().insert(alp);
-        EvinTime t = new EvinTime();
-        alp.setTime(t);
-        XApplication.getDaoSession().getEvinTimeDao().insert(t);
+        XApplication.getDaoSession().getEvinImageDao().insert(alp);
         return alp;
     }
 
@@ -489,13 +401,5 @@ public class MyDailyTopicFragment extends BaseFragment implements  OnClickListen
     public void onPause() {
         super.onPause();
     }
-
-
-    @Override
-    public void onDateSet(CalendarDatePickerDialogFragment dialog,int ADorBC, int year, int monthOfYear, int dayOfMonth) {
-
-
-    }
-
 
 }

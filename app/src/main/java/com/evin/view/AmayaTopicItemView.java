@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.media.ExifInterface;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.util.TimeUtils;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -12,6 +11,8 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -59,6 +60,8 @@ public class AmayaTopicItemView extends LinearLayout implements View.OnClickList
     private int index;
     private TextView yearView;
     private Calendar calendar = Calendar.getInstance();
+    private AutoCompleteTextView autoView;
+
     public AmayaTopicItemView(Context context) {
         super(context);
         init(context);
@@ -80,6 +83,12 @@ public class AmayaTopicItemView extends LinearLayout implements View.OnClickList
 
         View item = LayoutInflater.from(context).inflate(R.layout.edit_image, null);
         img = (ImageView) item.findViewById(R.id.amaya_tpitem_img);
+
+        autoView = (AutoCompleteTextView) item.findViewById(R.id.amaya_tpitem_type);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(context,
+                android.R.layout.simple_list_item_activated_1, getResources().getStringArray(
+                R.array.type_string));
+        autoView.setAdapter(adapter);
 
         RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) img.getLayoutParams();
         lp.width = UIUtil.amayaWidth/3;
@@ -151,7 +160,6 @@ public class AmayaTopicItemView extends LinearLayout implements View.OnClickList
     }
 
     private void setImageView(String path) {
-
         XApplication.getImageLoader().displayImage(path, img);
     }
 
@@ -263,7 +271,7 @@ public class AmayaTopicItemView extends LinearLayout implements View.OnClickList
 //                .setClickListener(new ISimpleDialogListener() {
 //                    @Override
 //                    public void onPositiveButtonClicked(int requestCode) {
-//                        MyDailyTopicFragment.inserIndex = index;
+//                        EditImageFragment.inserIndex = index;
 //                        AmayaConstants.AMAYA_BOOLEAN_INSERT_BILL = true;
 //                        ma.showCommonListFragment(false, true, AmayaConstants.AMAYA_FRAGMENT_BILLS, null);
 //                    }
@@ -275,7 +283,7 @@ public class AmayaTopicItemView extends LinearLayout implements View.OnClickList
 //                    @Override
 //                    public void onNegativeButtonClicked(int requestCode) {
 //                        AmayaConstants.AMAYA_BOOLEAN_INSERT_NOTE = true;
-//                        MyDailyTopicFragment.inserIndex = index;
+//                        EditImageFragment.inserIndex = index;
 //                        ma.showCommonListFragment(false, true, AmayaConstants.AMAYA_FRAGMENT_PARENT_NOTES, null);
 //
 //                    }
@@ -326,7 +334,43 @@ public class AmayaTopicItemView extends LinearLayout implements View.OnClickList
 
 
     public EvinImage getBean(){
+        String trim = autoView.getText().toString().trim();
+        if (!TextUtils.isEmpty(trim)) {
+            bean.setType(trim);
+        }
+        String desc = descView.getText().toString().trim();
+        if (!TextUtils.isEmpty(desc)) {
+            bean.setInfo(desc);
+        }
+
+
+
         return bean;
+    }
+
+    public void setBean(EvinImage bean) {
+        this.bean = bean;
+        setImageView(AmayaConstants.PREFIX_FILE + bean.getPath());
+        EventBus.getDefault().register(this);
+        if (bean.getLatitude() != 0 && bean.getLongitude() != 0 && !TextUtils.isEmpty(bean.getAddress())) {
+            gpsView.setText(bean.getAddress());
+        } else {
+            gpsView.update();
+        }
+        if (bean.getTime() != null) {
+            if (bean.getTime().getBcTime()) {
+                yearView.setText(getContext().getString(R.string.year_bc) + TimeUtil.parseTime(TimeUtil.PATTERN_3, bean.getTime().getTimeStamp()).replaceAll("^(0+)", ""));
+            } else {
+                yearView.setText(TimeUtil.parseTime(TimeUtil.PATTERN_3, bean.getTime().getTimeStamp()).replaceAll("^(0+)", ""));
+            }
+            calendar.setTimeInMillis(bean.getTime().getTimeStamp());
+        }
+
+        if (!TextUtils.isEmpty(bean.getType())) {
+            autoView.setText(bean.getType());
+            autoView.clearFocus();
+        }
+
     }
 
     @Subscribe
@@ -349,31 +393,11 @@ public class AmayaTopicItemView extends LinearLayout implements View.OnClickList
         bean.setAddress(address);
         gpsView.updateTextView(location.getLatitude(), location.getLongitude(), address);
     }
+
     public void onEventMainThread(AmayaEvent.RequestAddressEvent event) {
         if (event.hashKey != hashCode()) return;
         EventBus.getDefault().unregister(this);
         gpsView.gpsRegeocodeSearched(event.regeocodeResult, event.rCode);
-    }
-
-    public void setBean(EvinImage bean) {
-        this.bean = bean;
-        setImageView(AmayaConstants.PREFIX_FILE+bean.getPath());
-        EventBus.getDefault().register(this);
-        if(bean.getLatitude() != 0 && bean.getLongitude() != 0 && !TextUtils.isEmpty(bean.getAddress())){
-            gpsView.setText(bean.getAddress());
-        }else{
-            gpsView.update();
-        }
-        if(bean.getTime() != null){
-            if(bean.getTime().getBcTime()){
-                yearView.setText(getContext().getString(R.string.year_bc)+TimeUtil.parseTime(TimeUtil.PATTERN_3,bean.getTime().getTimeStamp()).replaceAll("^(0+)",""));
-            }else{
-
-                yearView.setText(TimeUtil.parseTime(TimeUtil.PATTERN_3,bean.getTime().getTimeStamp()).replaceAll("^(0+)",""));
-            }
-            calendar.setTimeInMillis(bean.getTime().getTimeStamp());
-        }
-
     }
 
     @Override

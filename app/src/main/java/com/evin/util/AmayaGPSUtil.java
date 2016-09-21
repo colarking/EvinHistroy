@@ -1,8 +1,5 @@
 package com.evin.util;
 
-import android.support.annotation.WorkerThread;
-import android.util.Log;
-
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationListener;
@@ -14,7 +11,6 @@ import com.amap.api.services.geocoder.RegeocodeQuery;
 import com.amap.api.services.geocoder.RegeocodeResult;
 import com.evin.R;
 import com.evin.activity.XApplication;
-import com.hwangjr.rxbus.RxBus;
 import com.hwangjr.rxbus.annotation.Produce;
 import com.hwangjr.rxbus.thread.EventThread;
 
@@ -25,6 +21,7 @@ public class AmayaGPSUtil {
     private static AMapLocationClient mAMapLocManager;
     private static AMapLocationListener locationListener;
     private static long lastRefreshTime;
+    private static int currentHashKey;
 
     /**
      * 获取手机经纬度
@@ -39,14 +36,12 @@ public class AmayaGPSUtil {
             locationListener = new AMapLocationListener() {
                 @Override
                 public void onLocationChanged(AMapLocation aMapLocation) {
-                    Log.e("amaya","onLocationChanged()..."+aMapLocation);
                     if(aMapLocation != null){
                         XApplication.evin.setLatitude(aMapLocation.getLatitude());
                         XApplication.evin.setLongitude(aMapLocation.getLongitude());
                         XApplication.evin.setAddress(aMapLocation.getAddress());
                         XApplication.evin.setName(aMapLocation.getPoiName());
                         EventBus.getDefault().post(aMapLocation);
-                        Log.e("amaya","onLocationChanged()...address="+aMapLocation.getAddress());
                     }
                     mAMapLocManager.stopLocation();
                 }
@@ -96,7 +91,8 @@ public class AmayaGPSUtil {
         }
     }
 
-    private static void initAddressCallback(final int hashKey) {
+    private static void initAddressCallback(int hashKey) {
+        currentHashKey = hashKey;
         if (geocoderSearch == null) {
             geocoderSearch = new GeocodeSearch(XApplication.getContext());
             geocoderSearch.setOnGeocodeSearchListener(new GeocodeSearch.OnGeocodeSearchListener() {
@@ -104,13 +100,13 @@ public class AmayaGPSUtil {
                 @Override
                 public void onRegeocodeSearched(RegeocodeResult regeocodeResult, int rCode) {
                     if (regeocodeResult == null) return;
-                    RxBus.get().post(new AmayaEvent.RequestAddressEvent(regeocodeResult, hashKey, rCode));
+                    EventBus.getDefault().post(new AmayaEvent.RequestAddressEvent(regeocodeResult, currentHashKey, rCode));
                 }
 
                 @Override
                 public void onGeocodeSearched(GeocodeResult result, int rCode) {
 //                EventBus.getDefault().post(new AmayaEvent.RequestAddressEvent(regeocodeResult,hashKey,rCode));
-                    if (rCode == 0) {
+                    if (rCode == 1000) {
                         if (result != null && result.getGeocodeAddressList() != null
                                 && result.getGeocodeAddressList().size() > 0) {
 //                            GeocodeAddress address = result.getGeocodeAddressList().get(0);
@@ -136,9 +132,6 @@ public class AmayaGPSUtil {
         }
     }
 
-    public void ss(){}
-
-
     @Produce(thread = EventThread.IMMEDIATE)
     public static void requestAddress(double latitude, double longitude, final int hashKey) {
         initAddressCallback(hashKey);
@@ -162,7 +155,6 @@ public class AmayaGPSUtil {
         return new LatLng(latLonPoint.getLatitude(), latLonPoint.getLongitude());
     }
 
-
     public static void onDestory() {
         if (geocoderSearch != null) {
             geocoderSearch = null;
@@ -173,5 +165,8 @@ public class AmayaGPSUtil {
         }
 
         locationListener = null;
+    }
+
+    public void ss() {
     }
 }

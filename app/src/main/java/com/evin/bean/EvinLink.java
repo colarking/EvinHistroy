@@ -18,7 +18,7 @@ public class EvinLink {
      * 跳转类型
      * 网址 id等
      */
-    private int type;
+    private int linkType;
     /**
      * url
      */
@@ -32,10 +32,10 @@ public class EvinLink {
     public EvinLink() {
     }
 
-    public EvinLink(int start, int end, int type, String path, String text) {
+    public EvinLink(int start, int end, int linkType, String path, String text) {
         this.start = start;
         this.end = end;
-        this.type = type;
+        this.linkType = linkType;
         this.path = path;
         this.text = text;
     }
@@ -56,12 +56,12 @@ public class EvinLink {
         this.end = end;
     }
 
-    public int getType() {
-        return type;
+    public int getLinkType() {
+        return linkType;
     }
 
-    public void setType(int type) {
-        this.type = type;
+    public void setLinkType(int linkType) {
+        this.linkType = linkType;
     }
 
     public String getPath() {

@@ -1,6 +1,7 @@
 package com.evin.util;
 
 import com.amap.api.services.geocoder.RegeocodeResult;
+import com.evin.bean.EvinPosition;
 
 import java.util.ArrayList;
 
@@ -51,5 +52,15 @@ public class AmayaEvent {
             this.hashKey = hashKey;
         }
 
+    }
+
+    public static class MapMakerChooseEvent {
+        public EvinPosition position;
+        public int hashKey;
+
+        public MapMakerChooseEvent(EvinPosition position, int hashKey) {
+            this.position = position;
+            this.hashKey = hashKey;
+        }
     }
 }

@@ -57,6 +57,8 @@ Quam libero nulla netus eu porta curae, ut nulla bibendum facilisis et urna sed,
     <string name="amaya_add_topic_photo">添加图片</string>
     <string name="pic_choose_full_tip">图片已满8张,请删除后重新选择&#046;&#046;&#046;</string>
     <string name="title_import_image">录入图片</string>
+    <string name="title_import_event">录入事件</string>
+    <string name="title_import_user">录入人物</string>
 
     <string name="animate">Animate</string>
     <string name="stop_animation">\u25A0</string>
@@ -68,4 +70,17 @@ Quam libero nulla netus eu porta curae, ut nulla bibendum facilisis et urna sed,
     <string name="right_arrow">\u2192</string>
     <string name="zoom_in">+</string>
     <string name="zoom_out">-</string>
+    <string name="type_label">类型</string>
+    <string name="entrance_1">图像</string>
+    <string name="entrance_2">事件</string>
+    <string name="entrance_3">人物</string>
+    <string name="event_name">事件名称</string>
+    <string name="event_type">事件类型</string>
+    <string name="event_content">事件内容</string>
+    <string name="event_position">事件地点</string>
+    <string name="choose_time">选择时间</string>
+    <string name="choose_time_start_tip">选择开始时间</string>
+    <string name="choose_time_end_tip">选择结束时间</string>
+    <string name="choose_time_start">开始于:%1$s</string>
+    <string name="choose_time_end">结束于:%1$s</string>
 </resources>

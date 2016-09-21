@@ -2,7 +2,6 @@ package com.evin.view;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
@@ -18,19 +17,15 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.amap.api.location.AMapLocation;
 import com.amap.api.services.core.PoiItem;
-import com.amap.api.services.geocoder.GeocodeResult;
 import com.amap.api.services.geocoder.RegeocodeAddress;
 import com.amap.api.services.geocoder.RegeocodeResult;
 import com.amap.api.services.geocoder.RegeocodeRoad;
 import com.amap.api.services.geocoder.StreetNumber;
 import com.evin.R;
 import com.evin.activity.AmayaMapMakersActivity;
-import com.evin.activity.PoiAroundSearchActivity;
 import com.evin.theme.EvinTheme;
-import com.evin.util.AmayaConstants;
 import com.evin.util.AmayaEvent;
 import com.evin.util.AmayaGPSUtil;
 import com.evin.util.AmayaToast;
@@ -355,7 +350,7 @@ public class AmayaGPSView extends LinearLayout implements View.OnClickListener {
 
     private void jumpToMap() {
         if (NetUtil.isNetworkAvailable()) {
-            Intent intent = new Intent(getContext(), PoiAroundSearchActivity.class);
+            Intent intent = new Intent(getContext(), AmayaMapMakersActivity.class);
             intent.putExtra("lng", longitude);
             intent.putExtra("lat", latitude);
             intent.putExtra("address", gpsAddress);
@@ -391,6 +386,14 @@ public class AmayaGPSView extends LinearLayout implements View.OnClickListener {
         }
         updateTextView(event.lat,event.lng,event.address);
 
+    }
+
+    @Subscribe
+    public void onEventMainThread(AmayaEvent.MapMakerChooseEvent event) {
+        if (hashCode() != event.hashKey) {
+            return;
+        }
+        updateTextView(event.position.getLatitude(), event.position.getLongitude(), event.position.getAddress());
     }
     @Subscribe
     public void onEventMainThread(AmayaEvent.RequestPermissionEvent event) {

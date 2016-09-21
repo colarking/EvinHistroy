@@ -1,26 +1,17 @@
 package com.evin.activity;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
 
 import com.evin.R;
-import com.evin.activity.edit.EditImageActivity;
 import com.evin.bean.EvinImage;
 import com.evin.presenter.IAmayaPresenter;
-import com.evin.presenter.impl.ImageChooserPresenter;
 import com.evin.util.UIUtil;
 
 import java.util.List;
@@ -52,7 +43,6 @@ public class MainActivity extends EvinActivity implements MenuItem.OnMenuItemCli
         return super.onCreateOptionsMenu(menu);
     }
 
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -71,8 +61,7 @@ public class MainActivity extends EvinActivity implements MenuItem.OnMenuItemCli
 //        Intent intent = new Intent(this,ImgChooserActivity.class);
 //        Intent intent = new Intent(this,GeocoderActivity.class);
 //        Intent intent = new Intent(this,PoiAroundSearchActivity.class);
-        Intent intent = new Intent(this,AmayaEditsActivity.class);
-        intent.putExtra("type",1);
+        Intent intent = new Intent(this, EditEntranceActivity.class);
         UIUtil.startActivity(this,intent);
         return false;
     }

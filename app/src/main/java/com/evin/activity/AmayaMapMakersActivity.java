@@ -3,22 +3,17 @@ package com.evin.activity;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.app.Dialog;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Point;
-import android.location.Location;
-import android.media.ExifInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -57,7 +52,6 @@ import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.services.core.LatLonPoint;
 import com.amap.api.services.core.PoiItem;
-import com.amap.api.services.geocoder.GeocodeResult;
 import com.amap.api.services.geocoder.RegeocodeAddress;
 import com.amap.api.services.geocoder.RegeocodeResult;
 import com.amap.api.services.geocoder.RegeocodeRoad;
@@ -79,25 +73,18 @@ import com.evin.util.CommonUtil;
 import com.evin.util.NetUtil;
 import com.evin.util.SpeedScrollListener;
 import com.evin.util.UIUtil;
-import com.umeng.analytics.MobclickAgent;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
 import rx.Observable;
-import rx.Single;
 import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.functions.Func0;
-import rx.internal.util.ActionSubscriber;
-import rx.subscriptions.CompositeSubscription;
 
 /**
  * Created with IntelliJ IDEA.
@@ -130,7 +117,7 @@ public class AmayaMapMakersActivity extends EvinActivity implements AMapLocation
     private String amayaAera;
     private SearchView searchView;
     private boolean addViewFouces;
-    private String wjqAction;
+    //    private String wjqAction;
     //    private ArrayList<AmayaPoi> aps;
     //    private PoiOverlay poiOverlay;
     private LinearLayout imgsLayout;
@@ -179,7 +166,7 @@ public class AmayaMapMakersActivity extends EvinActivity implements AMapLocation
     private PoiResult poiResult; // poi返回的结果
     private AMapLocationClient mlocationClient;
     private AMapLocationClientOption mLocationOption;
-    private String imageUrl;
+//    private String imageUrl;
 
     @Override
     protected IAmayaPresenter setIAmayaPresenter() {
@@ -194,10 +181,8 @@ public class AmayaMapMakersActivity extends EvinActivity implements AMapLocation
         mapView = (MapView) findViewById(R.id.amaya_map_maker);
         poiList = (ListView) findViewById(R.id.amaya_map_poi_list);
         mapView.onCreate(savedInstanceState);// 此方法必须重写
-//        AMap map = mapView.getMap();
         initView();
         initMapView();
-//        initImgsView();
         FrameLayout.LayoutParams flp = (FrameLayout.LayoutParams) poiList.getLayoutParams();
 
         flp.topMargin = UIUtil.amayaWidth / 2;
@@ -208,22 +193,22 @@ public class AmayaMapMakersActivity extends EvinActivity implements AMapLocation
         if (intent == null) finish();
         EvinPosition temp = intent.getParcelableExtra("bean");
 
-        imageUrl = intent.getStringExtra("imageUrl");
-        wjqAction = intent.getStringExtra("action");
+//        imageUrl = intent.getStringExtra("imageUrl");
         bean = new EvinPosition();
+        bean.setLatitude(intent.getDoubleExtra("lat", 0));
+        bean.setLongitude(intent.getDoubleExtra("lng", 0));
+        bean.setAddress(intent.getStringExtra("address"));
+        if (bean.getLatitude() == 0) {
+            bean.setLatitude(XApplication.evin.getLatitude());
+            bean.setLongitude(XApplication.evin.getLongitude());
+            bean.setAddress(XApplication.evin.getAddress());
+        }
         if (temp == null) {
-            bean.setLatitude(intent.getDoubleExtra("latitude", 0));
-            bean.setLongitude(intent.getDoubleExtra("longitude", 0));
-            bean.setAddress(intent.getStringExtra("address"));
-            if (bean.getLatitude() == 0) {
-                bean.setLatitude(XApplication.evin.getLatitude());
-                bean.setLongitude(XApplication.evin.getLongitude());
-                bean.setAddress(XApplication.evin.getAddress());
-            }
         } else {
             bean.setAddress(temp.getAddress());
             bean.setLatitude(temp.getLatitude());
             bean.setLongitude(temp.getLongitude());
+            animMap();
         }
         index = intent.getIntExtra("index", 0);
         amayaAera = intent.getStringExtra("aera");
@@ -239,7 +224,8 @@ public class AmayaMapMakersActivity extends EvinActivity implements AMapLocation
             lp = new LatLonPoint(bean.getLatitude(), bean.getLongitude());
         }
         EventBus.getDefault().register(this);
-        updateGPSDatas();
+//        updateGPSDatas();
+        doSearchQuery();
         setTitle(R.string.amaya_title_map_maker);
     }
 
@@ -578,45 +564,45 @@ public class AmayaMapMakersActivity extends EvinActivity implements AMapLocation
         animation.start();
     }
 
-    private void updateGPSDatas() {
-        if (NetUtil.isNetworkAvailable()) {
-            try {
-                if (bean.getLatitude() != 0) {
-                    showLoading(true);
-                    AmayaGPSUtil.requestAddress(bean.getLatitude(), bean.getLongitude(),hashCode());
-                } else if (TextUtils.isEmpty(imageUrl)) {
-
-                } else {
-                    ExifInterface eif = new ExifInterface(imageUrl);
-                    float[] gps = new float[2];
-                    boolean geted = eif.getLatLong(gps);
-                    bean.setLatitude(gps[0]);
-                    bean.setLongitude(gps[1]);
-                    wjqStep = 0;
-                    if (geted && gps[0] != 0 && gps[1] != 0) {
-                        wjqStep = 1;
-                        lp = new LatLonPoint(bean.getLatitude(), bean.getLongitude());
-                        AmayaGPSUtil.requestAddress(gps[0], gps[1],hashCode());
-                    } else if (XApplication.evin.getLongitude() != 0) {
-                        lp.setLatitude(XApplication.evin.getLatitude());
-                        lp.setLongitude(XApplication.evin.getLongitude());
-                        bean.setLatitude(lp.getLatitude());
-                        bean.setLongitude(lp.getLongitude());
-                        AmayaGPSUtil.requestAddress(XApplication.evin.getLatitude(), XApplication.evin.getLongitude(),hashCode());
-                    } else {
-//                        float latitude = AmayaSPUtil.getFloat(AmayaConstants.AMAYA_SPKEY_LAST_LATITUDE);
-//                        float longitude = AmayaSPUtil.getFloat(AmayaConstants.AMAYA_SPKEY_LAST_LONGITUDE);
-//                        lp = new LatLonPoint(latitude, longitude);
-//                        AmayaGPSUtil.requestAddress(latitude, longitude);
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-        }
-
-    }
+//    private void updateGPSDatas() {
+//        if (NetUtil.isNetworkAvailable()) {
+//            try {
+//                if (bean.getLatitude() != 0) {
+//                    showLoading(true);
+//                    AmayaGPSUtil.requestAddress(bean.getLatitude(), bean.getLongitude(),hashCode());
+//                } else if (TextUtils.isEmpty(imageUrl)) {
+//
+//                } else {
+//                    ExifInterface eif = new ExifInterface(imageUrl);
+//                    float[] gps = new float[2];
+//                    boolean geted = eif.getLatLong(gps);
+//                    bean.setLatitude(gps[0]);
+//                    bean.setLongitude(gps[1]);
+//                    wjqStep = 0;
+//                    if (geted && gps[0] != 0 && gps[1] != 0) {
+//                        wjqStep = 1;
+//                        lp = new LatLonPoint(bean.getLatitude(), bean.getLongitude());
+//                        AmayaGPSUtil.requestAddress(gps[0], gps[1],hashCode());
+//                    } else if (XApplication.evin.getLongitude() != 0) {
+//                        lp.setLatitude(XApplication.evin.getLatitude());
+//                        lp.setLongitude(XApplication.evin.getLongitude());
+//                        bean.setLatitude(lp.getLatitude());
+//                        bean.setLongitude(lp.getLongitude());
+//                        AmayaGPSUtil.requestAddress(XApplication.evin.getLatitude(), XApplication.evin.getLongitude(),hashCode());
+//                    } else {
+////                        float latitude = AmayaSPUtil.getFloat(AmayaConstants.AMAYA_SPKEY_LAST_LATITUDE);
+////                        float longitude = AmayaSPUtil.getFloat(AmayaConstants.AMAYA_SPKEY_LAST_LONGITUDE);
+////                        lp = new LatLonPoint(latitude, longitude);
+////                        AmayaGPSUtil.requestAddress(latitude, longitude);
+//                    }
+//                }
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        } else {
+//        }
+//
+//    }
 
 
 
@@ -638,7 +624,7 @@ public class AmayaMapMakersActivity extends EvinActivity implements AMapLocation
 
 
     public void gpsRegeocodeSearched(RegeocodeResult result, int rCode) {
-        if (rCode == 0) {
+        if (rCode == 1000) {
             if (result != null && result.getRegeocodeAddress() != null
                     && result.getRegeocodeAddress().getFormatAddress() != null) {
                 ArrayList<AmayaPoi> temp = new ArrayList<AmayaPoi>();
@@ -702,7 +688,6 @@ public class AmayaMapMakersActivity extends EvinActivity implements AMapLocation
                         scrollUp = true;
                     }
                 }
-//                updateCenterMarker(poiSelectIndex[lastIndex]);
                 addMarkersToMap(201314, bean.getLatitude(), bean.getLongitude(), EvinTheme.instance().getLocationPin());
                 mHandler.sendEmptyMessageDelayed(520, 500);
                 showLoading(false);
@@ -758,7 +743,7 @@ public class AmayaMapMakersActivity extends EvinActivity implements AMapLocation
     @Override
     public void onPoiSearched(PoiResult result, int rCode) {
         showLoading(false);
-        if (rCode == 0) {
+        if (rCode == 1000) {
             if (result != null && result.getQuery() != null) {// 搜索poi的结果
                 if (result.getQuery().equals(query)) {// 是否是同一条
                     poiResult = result;
@@ -777,6 +762,9 @@ public class AmayaMapMakersActivity extends EvinActivity implements AMapLocation
                             beans.add(new AmayaPoi(poiItem.toString(), poiItem.getLatLonPoint()));
                         }
                         Collections.sort(beans);
+                        if (poiBot.getTag() == null) {
+                            poiBot.setTag(0);
+                        }
                         int tagIndex = (Integer) poiBot.getTag();
                         amayaPoiItemAdapter.addAll(beans, true, poiSelectIndex[tagIndex]);
                         amayaPoiMaps.put(tagIndex, beans);
@@ -916,18 +904,17 @@ public class AmayaMapMakersActivity extends EvinActivity implements AMapLocation
                 } else {
                     addNewPoi(s);
                 }
-            } else if (!TextUtils.isEmpty(wjqAction)) {
+            } else {
+                EventBus.getDefault().post(new AmayaEvent.MapMakerChooseEvent(bean, getIntent().getIntExtra("hashKey", 0)));
+                finish();
 //                HashMap map = AmayaCommonUtil.put("ok_address", bean.gpsAddress);
 //                map.put("id", String.valueOf(MatrixApplication.mAccount.userId));
 //                MobclickAgent.onEvent(this,"MapGPS",map);
-                Intent intent = new Intent(wjqAction);
-                intent.putExtra("index", index);
-                intent.putExtra("longitude", bean.getLongitude());
-                intent.putExtra("latitude", bean.getLatitude());
-                intent.putExtra("address", bean.getAddress());
-//                EventBus.getDefault().post(new AmayaEvent.MapMakerChooseEvent(bean,index));
-                LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-                finish();
+//                Intent intent = new Intent(wjqAction);
+//                intent.putExtra("index", index);
+//                intent.putExtra("longitude", bean.getLongitude());
+//                intent.putExtra("latitude", bean.getLatitude());
+//                intent.putExtra("address", bean.getAddress());
             }
         } else {
 //            LatLng ll = aMap.getCameraPosition().target;
@@ -1266,6 +1253,19 @@ public class AmayaMapMakersActivity extends EvinActivity implements AMapLocation
     public void onEventMainThread(AMapLocation location){
 
         updateLatAndLng(location.getLatitude(),location.getLongitude(),location.getAddress(),location.getPoiName());
+
+        if (location.getLatitude() == 0) return;
+        bean.setLatitude(location.getLatitude());
+        bean.setLongitude(location.getLongitude());
+        bean.setAddress(location.getCity() + location.getDistrict());
+        if (lp == null) {
+            lp = new LatLonPoint(bean.getLatitude(), bean.getLongitude());
+        }
+        AmayaGPSUtil.requestAddress(bean.getLatitude(), bean.getLongitude(), hashCode());
+        float bearing = aMap.getCameraPosition().bearing;
+        aMap.setMyLocationRotateAngle(bearing);// 设置小蓝点旋转角度
+        aMap.setMyLocationEnabled(false);
+
     }
 
 

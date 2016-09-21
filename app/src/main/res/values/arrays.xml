@@ -1,4 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string-array name="type_string">
+        <item>人物</item>
+        <item>战争</item>
+        <item>会议</item>
+        <item>科技</item>
+        <item>天文</item>
+        <item>书籍</item>
+        <item>社论</item>
+        <item>趣闻</item>
+        <item>野史</item>
+    </string-array>
 </resources>
